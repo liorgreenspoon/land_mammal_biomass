@@ -5,13 +5,16 @@ import pandas as pd
 from matplotlib import pyplot
 from matplotlib.colors import LinearSegmentedColormap, hsv_to_rgb
 from shapely.geometry import Polygon
-import geoplot as gplt
-import matplotlib.pyplot
-import scipy.interpolate
-
 
 
 def get_data(n):
+    """
+    This function reads the the .csv file containing the mammal mass estimates
+    and the .shp poligon files.
+
+    Input: the number of mammalian species to be plotted
+    Output: mammal polygons with the mammal mass estimates
+    """
     data = pd.read_csv('new_predictions.csv')
     data = data.drop(['estimated_mass', 'estimated_pop'], axis=1)
     data = data[data.binomial != 'Sus scrofa']       # Wild Boar
@@ -61,6 +64,12 @@ def get_country_data():
 
 
 def gen_grid(delta):
+    """
+    This function generates a global grid cropped by continent polygons.
+
+    Input: tuple, (x,y) size of cell in m^2
+    Output:  a global grid cropped by continent polygons.
+    """
     outline = get_continent_data()
     xmin, ymin, xmax, ymax = outline.total_bounds
     dx, dy = delta
@@ -132,28 +141,6 @@ def overlay_and_sum(geo_data, layer):
     return inter
 
 
-# def gen_custom_cmap():
-#     # each row is (z-value, hue, saturation, value/brightness)
-#     values = [
-#         (0.00, 0.4, 0.0, 1.0),
-#         (0.05, 0.4, 0.5, 0.7),
-#         (0.10, 0.3, 0.5, 0.6),
-#         (0.20, 0.1, 0.5, 0.6),
-#         (0.40, 0.0, 0.5, 0.4),
-#         (0.60, 0.0, 0.5, 0.25),
-#         (0.80, 0.0, 1.0, 0.25),
-#         (1.00, 0.0, 1.0, 0.0),
-#     ]
-#     cdict = {"red": [], "green": [], "blue": []}
-#     for z, h, s, v in values:
-#         r, g, b = hsv_to_rgb((h, s, v))
-#         cdict["red"].append((z, r, r))
-#         cdict["green"].append((z, g, g))
-#         cdict["blue"].append((z, b, b))
-#     cmap = LinearSegmentedColormap('mammals', segmentdata=cdict, N=256)
-#     return cmap
-
-
 def gen_grid_plot(gridded_data, log10=False):
     continents_polygon = gpd.GeoDataFrame(get_continent_data_from_file()).rename(columns={0: "geometry"})
     continents_polygon.crs = "EPSG:6933"
@@ -181,6 +168,9 @@ def plot_mass_density_map_from_file():
 
 
 def gen_custom_cmap():
+    """
+    Output:  customized colormap.
+    """
     # each row is (z-value, hue, saturation, value/brightness)
     values = [
         (0.00, 0.15, 0.0, 1.0),
