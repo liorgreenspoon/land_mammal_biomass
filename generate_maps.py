@@ -15,7 +15,7 @@ def get_data(n):
     Input: the number of mammalian species to be plotted
     Output: mammal polygons with the mammal mass estimates
     """
-    data = pd.read_csv('new_predictions.csv')
+    data = pd.read_csv('map_data/lior_results_2.csv')
     data = data.drop(['estimated_mass', 'estimated_pop'], axis=1)
     data = data[data.binomial != 'Sus scrofa']       # Wild Boar
     data = data[data.binomial != 'Ursus maritimus']  # Polar bear
@@ -160,7 +160,7 @@ def gen_grid_plot(gridded_data, log10=False):
 
 
 def plot_mass_density_map_from_file():
-    gridded_mammal_mass = gpd.read_file('map_data/gridded_mammal_mass/gridded_mammal_mass.shp')
+    gridded_mammal_mass = gpd.read_file('map_data/gridded_mammal_mass_dec20/gridded_mammal_mass.shp')
     gridded_mammal_mass = gridded_mammal_mass.rename(columns={"total_ma_1": "total_mass_Mt"})
     gridded_mammal_mass = gridded_mammal_mass.rename(columns={"total_ma_2": "total_mass_kg"})
     gridded_mammal_mass = gridded_mammal_mass.rename(columns={"total_ma_3": "total_mass_kg_km2"})
