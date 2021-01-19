@@ -1,0 +1,32 @@
+,Level_1,Level_2,mass
+0,Marine,Baleen whales,24.47257099
+1,Marine,Beaked whales,2.7097479769999997
+2,Marine,Dolphins and Porpoises,4.20956866
+3,Marine,Otaries,0.8988336319999999
+4,Marine,Other Carnivores,0.2346741
+5,Marine,Sea cows,0.023947325
+6,Marine,Sperm whales,5.989870757
+7,Marine,True seals,5.255411733000001
+0,Terrestrial,Bats,0.6982916511391314
+1,Terrestrial,Carnivores,4.488427684397621
+2,Terrestrial,Even-toed hoofed mammals,12.493564578409936
+3,Terrestrial,Insect-eaters,0.17359587627853076
+4,Terrestrial,Odd-toed hoofed mammals,0.7670644891880196
+5,Terrestrial,Other,5.448283090443991
+6,Terrestrial,Pouched mammals,1.8275179499615106
+7,Terrestrial,Primates,1.4144177601367651
+8,Terrestrial,Rodents,5.347398636400333
+0,Domesticated,Asses,5.66
+1,Domesticated,Buffaloes,62.47
+2,Domesticated,Camelids,1.97
+3,Domesticated,Camels,6.17
+4,Domesticated,Cat,1.7
+5,Domesticated,Cattle,412.73
+6,Domesticated,Dog,22.0
+7,Domesticated,Goats,30.28
+8,Domesticated,Horses,16.4
+9,Human,Human,472.3
+10,Domesticated,Mules,1.27
+11,Domesticated,Pigs,69.44
+12,Domesticated,Rabbits and hares,0.51
+13,Domesticated,Sheep,37.57

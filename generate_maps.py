@@ -41,14 +41,6 @@ def get_data(n):
     return range_polygons
 
 
-# def get_continent_data():
-#     world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-#     world = world[world.continent != 'Antarctica']
-#     continents = world.dissolve(by='continent')
-#     continents = continents.to_crs("EPSG:6933")
-#     return continents
-
-
 def get_continent_data_from_file():
     continents = gpd.read_file('map_data/continent_shapefile/continent.shp')
     continents = continents[continents.CONTINENT != 'Antarctica']
@@ -140,25 +132,13 @@ def overlay_and_sum(geo_data, layer):
 
 
 def gen_grid_plot(gridded_data, log10=False):
+    continent_text_df = pd.read_csv('map_data/continent_text_for_plot.csv')
     continents_polygon = gpd.GeoDataFrame(get_continent_data_from_file()).rename(columns={0: "geometry"})
     continents_polygon.crs = "EPSG:6933"
     continents_polygon['continents_dissolve'] = pd.Series(
         data=['Eurasia', 'North America', 'Eurasia', 'Africa', 'South America', 'Oceania', 'Australia'],
         name='continent_edited')
     continents_polygon = continents_polygon.dissolve(by='continents_dissolve', aggfunc='sum')
-    # plt.rcParams["figure.figsize"] = (30, 10)
-    # font = {'weight': 'normal',
-    #         'size': 40}
-    # plt.rc('font', **font)
-    # fig, ax = pyplot.subplots(1, 1)
-    # ax.axis('off')
-    # cmap = plt.cm.get_cmap('gist_earth').reversed()
-    # # cmap = gen_custom_cmap()
-    # ax.set_label('verbosity coefficient')
-    # ax.set_title('Wild Mammal Mass Density')
-    # base = gridded_data.plot(column='total_mass_kg_km2' ,ax=ax, legend=True, cmap=cmap,
-    #                          legend_kwds={'label': r"$kg/km^2$"}, )
-    # continents_polygon.plot(ax=base, fc='none', ec='grey', linewidth=0.3)
     plt.rcParams["figure.figsize"] = (30, 10)
 
     font = {'weight': 'normal',
@@ -172,11 +152,8 @@ def gen_grid_plot(gridded_data, log10=False):
     ax.set_title('Wild Mammal Mass Density')
     base = gridded_data.plot(column='total_mass_kg_km2', ax=ax, legend=True, cmap=cmap,
                                     legend_kwds={'label': r"$kg/km^2$"})
-
     delta = (0, 7 * 10 ** 5)
-
     for row in range(0, 5):
-        continent_text_df = pd.read_csv('continent_text_for_plot.csv')
         base.annotate(text=continent_text_df['continents_dissolve'].iloc[row],
                       xy=eval(continent_text_df['loc'].iloc[row]),
                       ha='left', size=20, weight='bold')
@@ -187,7 +164,6 @@ def gen_grid_plot(gridded_data, log10=False):
                       continent_text_df['conributor_names'].iloc[row],
                       xy=np.subtract(eval(continent_text_df['loc'].iloc[row]),
                                      np.multiply(delta, (1, 2))), ha='left', size=20)
-
     continents_polygon.plot(ax=base, fc='none', ec='grey', linewidth=0.3)
     fig.savefig('mammal_by_pixel.png', format='png')
 
