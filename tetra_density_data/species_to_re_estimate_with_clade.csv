@@ -1,0 +1,11 @@
+binomial,Range,AdultBodyMassG,RedListStatus,TrophicLevel,clade1,clade2,clade4,clade7,clade8,clade9,CladeNumber
+Sus scrofa,27926226.5139789,84471.54,LC,Omnivore,0,0,0,0,0,1,9
+Antilope cervicapra,1754050.80102145,36301.1,LC,Herbivore,0,0,0,0,0,1,9
+Marmota baibacina,606980.346579303,5375,LC,Herbivore,0,0,1,0,0,0,4
+Martes zibellina,10081791.7279356,1173.91,LC,Omnivore,0,0,0,0,0,1,9
+Muntiacus reevesi,1886688.18983571,13499.94,LC,Herbivore,0,0,0,0,0,1,9
+Oryctolagus cuniculus,972311.225731338,1590.57,NT,Herbivore,0,0,1,0,0,0,4
+Moschus chrysogaster,1421239.73324434,13697.9,EN,Herbivore,0,0,0,0,0,1,9
+Moschus moschiferus,7225448.09030093,13315.57,VU,Herbivore,0,0,0,0,0,1,9
+Mustela lutreola,73609.5978865026,566.44,CR,Carnivore,0,0,0,0,0,1,9
+Pygathrix nigripes,95056.7973808216,10333.32,EN,Herbivore,0,0,0,1,0,0,7

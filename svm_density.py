@@ -1,5 +1,4 @@
 import pandas as pd
-# from tqdm.auto import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
@@ -13,9 +12,9 @@ pd.set_option('display.max_columns', 10000)
 
 def read_data() -> pd.DataFrame:
     data_file_names = dict(
-        mammal_labeled='svr_data/new_svr_data.csv',
-        mammal_not_labeled='svr_data/Mammal_AI_not_global_no_overlap.csv',
-        clades_labeled='svr_data/clade_df_labeled.csv',
+        mammal_labeled='svr_data/svr_training_data.csv',
+        mammal_not_labeled='svr_data/svr_to_predict.csv',
+        clades_labeled='svr_data/clade_df_training.csv',
         clades_not_labeled='svr_data/clade_df.csv'
     )
     df = pd.concat(
@@ -37,7 +36,7 @@ def read_data() -> pd.DataFrame:
 
 
 def preproc_data(data_raw: pd.DataFrame):
-    numerical_columns_rename = dict(Range='range', AdultBodyMassG='body_mass', GenerationLengthD='gen_length',
+    numerical_columns_rename = dict(Range_km_2='range', AdultBodyMassG='body_mass', GenerationLengthD='gen_length',
                                     total_pop='population', pop_density='density')
     data = (data_raw.rename(columns=numerical_columns_rename))
     data['RedListStatus'] = data['RedListStatus'].replace(['DD', 'NotAssigned'], 'LC')
@@ -49,7 +48,7 @@ def preproc_data(data_raw: pd.DataFrame):
     red_list_status = pd.get_dummies(data.RedListStatus, prefix='red_list_status')
     clades = pd.get_dummies(data.clade, prefix='clade')
     data = pd.concat([data, red_list_status, clades], axis=1)
-    data = data.drop(['Family', 'Genus', 'Order', 'Range_m', 'RedListStatus', 'TrophicLevel',
+    data = data.drop(['Family', 'Genus', 'Order', 'Range_m_2', 'RedListStatus', 'TrophicLevel',
                       'population', 'gen_length', 'label', 'population'], axis=1)
     cat_features = list(red_list_status.columns)+list(clades.columns)
     cont_features = ['log_range', 'log_body_mass']
@@ -87,31 +86,31 @@ def svr(labeled_data, cat_features, cont_features, label_name, random_state):
                                             result_df.log_population-result_df.log_range))
     return [result_df, rmse]
 
+
 def update_result_df(result_df):
     result_df['prediction_mean'] = result_df.loc[:, result_df.columns == 'predictions'].mean(numeric_only=True, axis=1)
     result_df = result_df.drop(['predictions'], axis=1)
     return result_df
 
 
-def svr_predict(data, cat_features, cont_features, label_name):
+def svr_predict(data, cat_features, cont_features, label_name, mean_rmse):
     feature_scaler, label_scaler, scaled_features, scaled_labels = \
         scale_cont(data, cont_features, label_name)
     scaled_df = pd.concat([scaled_features, data[cat_features]], axis=1)
     regressor = SVR(kernel='rbf', epsilon=0.1)
     regressor.fit(scaled_df.loc['labeled'], scaled_labels.loc['labeled'].values.ravel())
     log_predictions = label_scaler.inverse_transform(regressor.predict(scaled_df.loc['not_labeled']))
-    predictions = np.power(10, (log_predictions + (0.69**2) / 2 * np.log(10)))     # E(x)= 10[μ+22*ln(10)]
+
+    # unbiased estimator of the mean
+    predictions = np.power(10, (log_predictions + (round(mean_rmse, 1)**2) / 2 * np.log(10)))
     predictions_df = pd.DataFrame(predictions, index=scaled_df.loc['not_labeled'].index, columns=['predictions'])
     predictions_df = data.loc['not_labeled'].join(predictions_df)
     if label_name[0] =='log_density':
-        predictions_df = predictions_df.assign(population=predictions_df.predictions *
-                                                             predictions_df.range)
-        predictions_df = predictions_df.assign(total_mass_Mt=predictions_df.population *
-                                                             predictions_df.body_mass * 10 ** (-12))
-        # print('DENSITY')
+        predictions_df = predictions_df.assign(population=predictions_df.predictions * predictions_df.range)
+        predictions_df = predictions_df.assign(total_mass_Mt=predictions_df.population * predictions_df.body_mass *
+                                                             10 ** (-12))
     elif label_name[0] =='log_population':
-        predictions_df = predictions_df.assign(total_mass_Mt=predictions_df.predictions *
-                                                             predictions_df.body_mass * 10**(-12))
-        # print('POP')
+        predictions_df = predictions_df.assign(total_mass_Mt=predictions_df.predictions * predictions_df.body_mass *
+                                                             10 ** (-12))
     return predictions_df
 

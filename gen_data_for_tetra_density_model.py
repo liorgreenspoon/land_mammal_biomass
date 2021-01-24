@@ -28,53 +28,56 @@ def polygon_to_grid(delta, polygon):
 
 
 def get_gridded_data(one_species):
-    path = 'shp_files/'
+    path = 'tetra_density_data/shp_files/'
     stat = "mean"
     spatial_res_grid = 20000
     spatial_res = 100*10**6
 
-    annual_mean_temp_str = 'data/annual_mean_temp_projected.tif'
-    prec_warmest_quarter_str = 'data/prec_warmest_quarter_projected.tif'
-    temp_seasonality_str = 'data/temp_seasonality_projected.tif'
-    npp_str = 'data/npp_projected.tif'
-    prec_seasonality_str = 'data/prec_seasonality_projected.tif'
-    binomial = one_species.name.replace(' ', '_')
-
+    annual_mean_temp_str = 'tetra_density_data/annual_mean_temp_projected.tif'
+    prec_warmest_quarter_str = 'tetra_density_data/prec_warmest_quarter_projected.tif'
+    temp_seasonality_str = 'tetra_density_data/temp_seasonality_projected.tif'
+    npp_str = 'tetra_density_data/npp_projected.tif'
+    prec_seasonality_str = 'tetra_density_data/prec_seasonality_projected.tif'
+    binomial = one_species.binomial.replace(' ', '_')
     polygon = one_species.geometry
     if polygon.area > spatial_res:
         grid = polygon_to_grid((spatial_res_grid, spatial_res_grid), polygon)
     else:
         grid = one_species
-    grid.to_file(path + binomial + '.shp')
-    grid = grid.assign(binomial=binomial,
-                       annual_mean_temp=pd.DataFrame(zonal_stats(path + binomial + '.shp',
-                                                                 annual_mean_temp_str,
-                                                                 stats=stat, all_touched=True)),
-                       prec_warmest_quarter=pd.DataFrame(zonal_stats(path + binomial + '.shp',
-                                                                     prec_warmest_quarter_str,
+    try:
+        grid.to_file(path + binomial + '.shp')
+        grid = grid.assign(binomial=binomial,
+                           annual_mean_temp=pd.DataFrame(zonal_stats(path + binomial + '.shp',
+                                                                     annual_mean_temp_str,
                                                                      stats=stat, all_touched=True)),
-                       temp_seasonality=pd.DataFrame(zonal_stats(path + binomial + '.shp',
-                                                                 temp_seasonality_str,
-                                                                 stats=stat, all_touched=True)),
-                       npp=pd.DataFrame(zonal_stats(path + binomial + '.shp',
-                                                    npp_str,
-                                                    stats=stat, all_touched=True)),
-                       prec_seasonality=pd.DataFrame(zonal_stats(path + binomial + '.shp',
-                                                                 prec_seasonality_str,
-                                                                 stats=stat, all_touched=True))
-                       )
-    grid = grid[['grid_index', 'area', 'annual_mean_temp',
-                 'prec_warmest_quarter', 'temp_seasonality', 'prec_seasonality', 'npp', 'binomial']].dropna()
-    grid.to_csv('results/' + binomial + '.csv')
-    print(binomial + ' done')
+                           prec_warmest_quarter=pd.DataFrame(zonal_stats(path + binomial + '.shp',
+                                                                         prec_warmest_quarter_str,
+                                                                         stats=stat, all_touched=True)),
+                           temp_seasonality=pd.DataFrame(zonal_stats(path + binomial + '.shp',
+                                                                     temp_seasonality_str,
+                                                                     stats=stat, all_touched=True)),
+                           npp=pd.DataFrame(zonal_stats(path + binomial + '.shp',
+                                                        npp_str,
+                                                        stats=stat, all_touched=True)),
+                           prec_seasonality=pd.DataFrame(zonal_stats(path + binomial + '.shp',
+                                                                     prec_seasonality_str,
+                                                                     stats=stat, all_touched=True))
+                           )
+        grid = grid[['grid_index', 'area', 'annual_mean_temp', 'prec_warmest_quarter', 'temp_seasonality',
+                     'prec_seasonality', 'npp', 'binomial']].dropna()
+        pd.DataFrame(grid).to_csv('tetra_density_data/results/' + binomial + '.csv')
+        print(binomial + ' done')
+    except:
+        print("Couldn't process "+ binomial)
 
 
 def main():
-    geo_data = gpd.read_file('TERRESTRIAL_MAMMALS/TERRESTRIAL_MAMMALS.shp').to_crs("EPSG:6933")
-    mammals_df = pd.read_csv('combined_dataset.csv')
-    mammals_df = mammals_df[mammals_df.label == 'Entire range'][['binomial']]
-    mammals_df_geo = gpd.GeoDataFrame(mammals_df.merge(geo_data, on='binomial', how='left'))
-    mammals_df_geo = mammals_df_geo.dissolve(by='binomial')
+    mammals_df_geo = gpd.read_file('TERRESTRIAL_MAMMALS/TERRESTRIAL_MAMMALS.shp').to_crs("EPSG:6933")
+    ## Uncomment the section below to run for just a subset
+    # subset = pd.read_csv('missing_tetra_density_species.csv')
+    # mammals_df_geo = gpd.GeoDataFrame(subset.merge(mammals_df_geo, on='binomial', how='left'))
+    mammals_df_geo = mammals_df_geo.reset_index()
+    mammals_df_geo = mammals_df_geo.dissolve(by='binomial').reset_index()
     mammals_df_geo.apply(get_gridded_data, axis=1)
 
 
