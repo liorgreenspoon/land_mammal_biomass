@@ -48,8 +48,8 @@ def preproc_data(data_raw: pd.DataFrame):
     red_list_status = pd.get_dummies(data.RedListStatus, prefix='red_list_status')
     clades = pd.get_dummies(data.clade, prefix='clade')
     data = pd.concat([data, red_list_status, clades], axis=1)
-    data = data.drop(['Family', 'Genus', 'Order', 'Range_m_2', 'RedListStatus', 'TrophicLevel',
-                      'population', 'gen_length', 'label', 'population'], axis=1)
+    data = data.drop(['Family', 'Genus', 'Order', 'RedListStatus', 'TrophicLevel',
+                      'population', 'label', 'population'], axis=1)
     cat_features = list(red_list_status.columns)+list(clades.columns)
     cont_features = ['log_range', 'log_body_mass']
     label_name = ['log_density']

@@ -30,8 +30,8 @@ def polygon_to_grid(delta, polygon):
 def get_gridded_data(one_species):
     path = 'tetra_density_data/shp_files/'
     stat = "mean"
-    spatial_res_grid = 20000
-    spatial_res = 100*10**6
+    spatial_res_grid = 1*10**5                 # m
+    spatial_res = (spatial_res_grid**2)*2     # m^2
 
     annual_mean_temp_str = 'tetra_density_data/annual_mean_temp_projected.tif'
     prec_warmest_quarter_str = 'tetra_density_data/prec_warmest_quarter_projected.tif'
@@ -43,7 +43,10 @@ def get_gridded_data(one_species):
     if polygon.area > spatial_res:
         grid = polygon_to_grid((spatial_res_grid, spatial_res_grid), polygon)
     else:
-        grid = one_species
+        grid = gpd.GeoDataFrame(one_species).transpose().set_geometry('geometry')
+        grid = grid.assign(area=grid.area * 10 ** (-6))
+        grid['grid_index'] = '0'
+        grid = grid[['grid_index', 'area', 'geometry']]
     try:
         grid.to_file(path + binomial + '.shp')
         grid = grid.assign(binomial=binomial,
@@ -68,18 +71,18 @@ def get_gridded_data(one_species):
         pd.DataFrame(grid).to_csv('tetra_density_data/results/' + binomial + '.csv')
         print(binomial + ' done')
     except:
-        print("Couldn't process "+ binomial)
+        print("Couldn't process " + binomial)
 
 
-def main():
-    mammals_df_geo = gpd.read_file('TERRESTRIAL_MAMMALS/TERRESTRIAL_MAMMALS.shp').to_crs("EPSG:6933")
-    ## Uncomment the section below to run for just a subset
-    # subset = pd.read_csv('missing_tetra_density_species.csv')
-    # mammals_df_geo = gpd.GeoDataFrame(subset.merge(mammals_df_geo, on='binomial', how='left'))
-    mammals_df_geo = mammals_df_geo.reset_index()
-    mammals_df_geo = mammals_df_geo.dissolve(by='binomial').reset_index()
-    mammals_df_geo.apply(get_gridded_data, axis=1)
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     mammals_df_geo = gpd.read_file('TERRESTRIAL_MAMMALS/TERRESTRIAL_MAMMALS.shp').to_crs("EPSG:6933")
+#     ## Uncomment the section below to run for just a subset
+#     # subset = pd.read_csv('missing_tetra_density_species.csv')
+#     # mammals_df_geo = gpd.GeoDataFrame(subset.merge(mammals_df_geo, on='binomial', how='left'))
+#     mammals_df_geo = mammals_df_geo.reset_index()
+#     mammals_df_geo = mammals_df_geo.dissolve(by='binomial').reset_index()
+#     mammals_df_geo.apply(get_gridded_data, axis=1)
+#
+#
+# if __name__ == "__main__":
+#     main()
