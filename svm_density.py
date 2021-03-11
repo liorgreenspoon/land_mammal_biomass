@@ -5,6 +5,7 @@ from sklearn.svm import SVR
 import numpy as np
 import math
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import OrdinalEncoder
 
 # tqdm.pandas()
 pd.set_option('display.max_columns', 10000)
